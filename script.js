@@ -442,6 +442,100 @@ const data = [
     }
 ];
 
+const searchInput = document.getElementById("search");
+const teamFilter = document.getElementById("team-filter");
+const darkModeButton = document.getElementById("dark-mode-toggle");
+const tableBody = document.getElementById("player-rows");
+
+// Populate the team filter using the provided data.
+function populateTeamFilter() {
+    const teams = [...new Set(data.map(player => player.team))];
+
+    teams.sort().forEach(team => {
+        const option = document.createElement("option");
+        option.value = team;
+
+        // Display the team abbreviation, e.g. PHI.
+        const match = team.match(/\(([^)]+)\)$/);
+        option.textContent = match ? match[1] : team;
+
+        teamFilter.appendChild(option);
+    });
+}
+
+// Display the players in the table.
+function displayPlayers(players) {
+    tableBody.innerHTML = "";
+
+    players.forEach(player => {
+        const row = document.createElement("tr");
+
+        const teamMatch = player.team.match(/\(([^)]+)\)$/);
+        const teamName = teamMatch ? teamMatch[1] : player.team;
+
+        const values = [
+            player.name,
+            teamName,
+            player.points,
+            player.rebounds,
+            player.assists
+        ];
+
+        values.forEach(value => {
+            const cell = document.createElement("td");
+            cell.textContent = value;
+            row.appendChild(cell);
+        });
+
+        tableBody.appendChild(row);
+    });
+
+    if (players.length === 0) {
+        const row = document.createElement("tr");
+        const cell = document.createElement("td");
+
+        cell.colSpan = 5;
+        cell.textContent = "No players found.";
+        row.appendChild(cell);
+        tableBody.appendChild(row);
+    }
+}
+
+// Search and filter the player data.
+function filterPlayers() {
+    const searchTerm = searchInput.value.toLowerCase().trim();
+    const selectedTeam = teamFilter.value;
+
+    const filteredPlayers = data.filter(player => {
+        const matchesSearch =
+            player.name.toLowerCase().includes(searchTerm) ||
+            player.team.toLowerCase().includes(searchTerm);
+
+        const matchesTeam =
+            selectedTeam === "all" || player.team === selectedTeam;
+
+        return matchesSearch && matchesTeam;
+    });
+
+    displayPlayers(filteredPlayers);
+}
+
+// Required event: update results while typing.
+searchInput.addEventListener("input", filterPlayers);
+
+// Required event: update results when the team changes.
+teamFilter.addEventListener("change", filterPlayers);
+
+// Required event: toggle dark mode.
+darkModeButton.addEventListener("click", () => {
+    document.body.classList.toggle("dark-mode");
+});
+
+// Initialize the dashboard.
+populateTeamFilter();
+displayPlayers(data);
+
+
 
 
 
